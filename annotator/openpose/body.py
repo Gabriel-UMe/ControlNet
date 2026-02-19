@@ -17,7 +17,7 @@ class Body(object):
         if torch.cuda.is_available():
             self.model = self.model.cuda()
             print('cuda')
-        model_dict = util.transfer(self.model, torch.load(model_path))
+        model_dict = util.transfer(self.model, torch.load(model_path, weights_only=False))
         self.model.load_state_dict(model_dict)
         self.model.eval()
 

@@ -61,7 +61,7 @@ class HEDdetector:
             from basicsr.utils.download_util import load_file_from_url
             load_file_from_url(remote_model_path, model_dir=annotator_ckpts_path)
         self.netNetwork = ControlNetHED_Apache2().float().cuda().eval()
-        self.netNetwork.load_state_dict(torch.load(modelpath))
+        self.netNetwork.load_state_dict(torch.load(modelpath, weights_only=False))
 
     def __call__(self, input_image):
         assert input_image.ndim == 3

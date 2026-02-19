@@ -259,7 +259,7 @@ def load_from_local(filename, map_location):
 
     if not osp.isfile(filename):
         raise IOError(f'{filename} is not a checkpoint file')
-    checkpoint = torch.load(filename, map_location=map_location)
+    checkpoint = torch.load(filename, map_location=map_location, weights_only=False)
     return checkpoint
 
 
@@ -319,7 +319,7 @@ def load_from_pavi(filename, map_location=None):
     with TemporaryDirectory() as tmp_dir:
         downloaded_file = osp.join(tmp_dir, model.name)
         model.download(downloaded_file)
-        checkpoint = torch.load(downloaded_file, map_location=map_location)
+        checkpoint = torch.load(downloaded_file, map_location=map_location, weights_only=False)
     return checkpoint
 
 
@@ -360,7 +360,7 @@ def load_from_ceph(filename, map_location=None, backend='petrel'):
         file_client = FileClient(backend=allowed_backends[0])
 
     with io.BytesIO(file_client.get(filename)) as buffer:
-        checkpoint = torch.load(buffer, map_location=map_location)
+        checkpoint = torch.load(buffer, map_location=map_location, weights_only=False)
     return checkpoint
 
 
@@ -423,7 +423,7 @@ def load_from_openmmlab(filename, map_location=None):
         filename = osp.join(_get_mmcv_home(), model_url)
         if not osp.isfile(filename):
             raise IOError(f'{filename} is not a checkpoint file')
-        checkpoint = torch.load(filename, map_location=map_location)
+        checkpoint = torch.load(filename, map_location=map_location, weights_only=False)
     return checkpoint
 
 
