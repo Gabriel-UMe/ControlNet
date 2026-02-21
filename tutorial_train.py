@@ -1,11 +1,16 @@
 from share import *
 
 import pytorch_lightning as pl
+import torch
 from torch.utils.data import DataLoader
+
 from tutorial_dataset import MyDataset
 from cldm.logger import ImageLogger
 from cldm.model import create_model, load_state_dict
 
+# Support use of tensor cores
+# https://docs.pytorch.org/docs/stable/generated/torch.set_float32_matmul_precision.html#torch.set_float32_matmul_precision
+torch.set_float32_matmul_precision('high')
 
 # Configs
 resume_path = './models/control_sd15_ini.ckpt'
