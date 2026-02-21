@@ -1,16 +1,14 @@
 name: control
 channels:
-  - pytorch
-  - nvidia
   - defaults
 dependencies:
   - python=3.12
   - pip=24.0
-  - pytorch-cuda=11.8
-  - pytorch=2.5.1
-  - torchvision=0.20.1
   - numpy=1.26.4
   - pip:
+      - --extra-index-url https://download.pytorch.org/whl/cu130
+      - torch==2.10.0
+      - torchvision==0.25.0
       - gradio==4.44.1
       - albumentations==1.4.20
       - opencv-contrib-python==4.10.0.84
@@ -33,3 +31,13 @@ dependencies:
       - prettytable==3.12.0
       - safetensors==0.4.5
       - basicsr==1.4.2
+      - nvidia-cufft
+      - nvidia-curand
+      - nvidia-cusolver
+      - nvidia-cusparse
+      - nvidia-nvjitlink
+      - nvidia-nvtx
+      - nvidia-cudnn-cu13
+      - nvidia-cusparselt-cu13
+      - nvidia-nccl-cu13
+      - nvidia-nvshmem-cu13
