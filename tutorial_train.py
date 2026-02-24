@@ -10,6 +10,12 @@ from tutorial_dataset import MyDataset
 from cldm.logger import ImageLogger
 from cldm.model import create_model, load_state_dict
 
+# PROBLEM:
+# Stack trace of the failed collective not found, potentially because FlightRecorder is disabled.
+# You can enable it by setting TORCH_NCCL_TRACE_BUFFER_SIZE to a non-zero value.
+# SOLUTION:
+os.environ['TORCH_NCCL_TRACE_BUFFER_SIZE'] = '10000000'
+
 # Support use of tensor cores
 # https://docs.pytorch.org/docs/stable/generated/torch.set_float32_matmul_precision.html#torch.set_float32_matmul_precision
 torch.set_float32_matmul_precision('high')
