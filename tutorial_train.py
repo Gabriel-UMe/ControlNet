@@ -15,6 +15,11 @@ from cldm.model import create_model, load_state_dict
 # You can enable it by setting TORCH_NCCL_TRACE_BUFFER_SIZE to a non-zero value.
 # SOLUTION:
 os.environ['TORCH_NCCL_TRACE_BUFFER_SIZE'] = '10000000'
+os.environ['NCCL_DEBUG'] = 'INFO'
+os.environ['NCCL_DEBUG_SUBSYS'] = 'ALL'
+# https://docs.pytorch.org/docs/main/distributed.html#debugging-torch-distributed-applications
+os.environ['TORCH_CPP_LOG_LEVEL'] = 'INFO'
+os.environ['TORCH_DISTRIBUTED_DEBUG'] = 'DETAIL'
 
 # Support use of tensor cores
 # https://docs.pytorch.org/docs/stable/generated/torch.set_float32_matmul_precision.html#torch.set_float32_matmul_precision
