@@ -52,6 +52,14 @@ def select_cuda_devices():
     return [device]
 
 
+# WARNING: Setting strategy='ddp' will result in an error:
+# RuntimeError: It looks like your LightningModule has parameters that were not used in producing the loss returned by training_step.
+# If this is intentional, you must enable the detection of unused parameters in DDP,
+# either by setting the string value `strategy='ddp_find_unused_parameters_true'`
+# or by setting the flag in the strategy with `strategy=DDPStrategy(find_unused_parameters=True)`.
+#
+# Setting strategy='ddp_find_unused_parameters_true' works!
+
 # Optionally configure PyTorch-Lightning from a file
 if os.path.exists('PLTrainer.json'):
     with open('PLTrainer.json', 'r') as f:
