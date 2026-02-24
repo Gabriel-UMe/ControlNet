@@ -1,5 +1,7 @@
 from share import *
 
+import json
+import os
 import pytorch_lightning as pl
 import torch
 from torch.utils.data import DataLoader
@@ -29,26 +31,40 @@ model.sd_locked = sd_locked
 model.only_mid_control = only_mid_control
 
 
-# Print available CUDA devices and select the one with the most memory
-# NOTE: This enumeration may not match the system enumeration!
-device = -1
-device_memory = 0
-print(f"Available CUDA devices: {torch.cuda.is_available()}")
-for i in range(torch.cuda.device_count()):
-    device_properties = torch.cuda.get_device_properties(i)
-    device_memory += device_properties.total_memory
-    if device_memory < device_properties.total_memory:
-        device = i
-        device_memory = device_properties.total_memory
-    print(f"- CUDA Visible Device {i}: {torch.cuda.get_device_name(i)}, memory = {device_properties.total_memory / 1024**3:.2f} GB")
-
-
 # Misc
 dataset = MyDataset()
 dataloader = DataLoader(dataset, num_workers=0, batch_size=batch_size, shuffle=True)
 logger = ImageLogger(batch_frequency=logger_freq)
-trainer = pl.Trainer(max_epochs=-1, num_nodes=1, precision=32, callbacks=[logger], devices=[i], accelerator='gpu', strategy='auto')
 
+
+# Print available CUDA devices and select the single device with the most memory
+def select_cuda_devices():
+    device = -1
+    device_memory = 0
+    # WARNING: The device enumeration may not match the system enumeration!
+    print(f"Available CUDA devices: {torch.cuda.is_available()}")
+    for i in range(torch.cuda.device_count()):
+        device_properties = torch.cuda.get_device_properties(i)
+        if device_memory < device_properties.total_memory:
+            device = i
+            device_memory = device_properties.total_memory
+        print(f"- CUDA Visible Device {i}: {torch.cuda.get_device_name(i)}, memory = {device_properties.total_memory / 1024**3:.2f} GB")
+    return [device]
+
+
+# Optionally configure PyTorch-Lightning from a file
+if os.path.exists('PLTrainer.json'):
+    with open('PLTrainer.json', 'r') as f:
+        trainer_config = json.load(f)
+    trainer_config['callbacks'] = [logger]
+    if trainer_config.get('devices', None) is None:
+        trainer_config['devices'] = select_cuda_devices()
+        trainer_config['accelerator'] = 'gpu'
+    trainer = pl.Trainer(**trainer_config)
+    print("Configured PyTorch-Lightning trainer from file")
+else:
+    devices = select_cuda_devices()
+    trainer = pl.Trainer(max_epochs=1, num_nodes=1, precision=32, callbacks=[logger], devices=devices, accelerator='gpu', strategy='auto')
 
 # Train!
 trainer.fit(model, dataloader)
