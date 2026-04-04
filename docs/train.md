@@ -196,7 +196,7 @@ Note that if you find OOM, perhaps you need to enable [Low VRAM mode](low_vram.m
 batch_size = 1
 
 # Misc
-trainer = pl.Trainer(gpus=1, precision=32, callbacks=[logger], accumulate_grad_batches=4)  # But this will be 4x slower
+trainer = pl.Trainer(... precision=32, accumulate_grad_batches=4, strategy='auto')
 ```
 
 Note that training with 8 GB laptop GPU is challenging. We will need some GPU memory optimization at least as good as automatic1111’s UI. This may require expert modifications to the code.
