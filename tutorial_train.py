@@ -21,6 +21,10 @@ os.environ['NCCL_DEBUG_SUBSYS'] = 'ALL'
 os.environ['TORCH_CPP_LOG_LEVEL'] = 'INFO'
 os.environ['TORCH_DISTRIBUTED_DEBUG'] = 'DETAIL'
 
+# Recommended setting in case OOM occurs.
+# https://pytorch.org/docs/stable/notes/cuda.html#environment-variables
+os.environ['PYTORCH_ALLOC_CONF'] = 'expandable_segments:True'
+
 # Support use of tensor cores
 # https://docs.pytorch.org/docs/stable/generated/torch.set_float32_matmul_precision.html#torch.set_float32_matmul_precision
 torch.set_float32_matmul_precision('high')
@@ -49,7 +53,7 @@ logger = ImageLogger(batch_frequency=logger_freq)
 
 
 # Print available CUDA devices and select the single device with the most memory
-def select_cuda_devices():
+def select_one_cuda_device():
     device = -1
     device_memory = 0
     # WARNING: The device enumeration may not match the system enumeration!
@@ -59,8 +63,19 @@ def select_cuda_devices():
         if device_memory < device_properties.total_memory:
             device = i
             device_memory = device_properties.total_memory
-        print(f"- CUDA Visible Device {i}: {torch.cuda.get_device_name(i)}, memory = {device_properties.total_memory / 1024**3:.2f} GB")
+        print(f"- Visible CUDA Device {i}: {torch.cuda.get_device_name(i)}, memory = {device_properties.total_memory / 1024**3:.2f} GB")
+    print(f"Selected CUDA Device {device}: {torch.cuda.get_device_name(device)}")
     return [device]
+
+def select_all_cuda_devices():
+    devices = []
+    # WARNING: The device enumeration may not match the system enumeration!
+    print(f"Available CUDA devices: {torch.cuda.is_available()}")
+    for i in range(torch.cuda.device_count()):
+        device_properties = torch.cuda.get_device_properties(i)
+        devices.append(i)
+        print(f"- Including CUDA Device {i}: {torch.cuda.get_device_name(i)}, memory = {device_properties.total_memory / 1024**3:.2f} GB")
+    return devices
 
 
 # WARNING: Setting strategy='ddp' will result in an error:
@@ -75,15 +90,22 @@ def select_cuda_devices():
 if os.path.exists('PLTrainer.json'):
     with open('PLTrainer.json', 'r') as f:
         trainer_config = json.load(f)
-    trainer_config['callbacks'] = [logger]
     if trainer_config.get('devices', None) is None:
-        trainer_config['devices'] = select_cuda_devices()
+        trainer_config['devices'] = select_all_cuda_devices()
         trainer_config['accelerator'] = 'gpu'
+    trainer_config['callbacks'] = [logger]
     trainer = pl.Trainer(**trainer_config)
     print("Configured PyTorch-Lightning trainer from file")
 else:
-    devices = select_cuda_devices()
-    trainer = pl.Trainer(max_epochs=1, num_nodes=1, precision=32, callbacks=[logger], devices=devices, accelerator='gpu', strategy='auto')
+    # Works on a single 4090 GPU
+    devices = select_one_cuda_device()
+    trainer = pl.Trainer(
+        callbacks = [logger],
+        max_epochs=1,
+        precision = 32,
+        num_nodes=1, devices=devices, accelerator='gpu',
+        accumulate_grad_batches=1, strategy='auto'
+    )
 
 # Train!
 trainer.fit(model, dataloader)
