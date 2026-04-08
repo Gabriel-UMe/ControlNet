@@ -1,0 +1,26 @@
+{
+  "environ": {
+    "TORCH_CPP_LOG_LEVEL": "INFO",
+    "TORCH_DISTRIBUTED_DEBUG": "DETAIL",
+    "TORCH_NCCL_TRACE_BUFFER_SIZE": "10000000",
+    "NCCL_DEBUG": "INFO",
+    "NCCL_DEBUG_SUBSYS": "ALL"
+  },
+  "loader": {
+    "num_workers": 0,
+    "batch_size": 2,
+    "shuffle": true
+  },
+  "trainer": {
+    "num_nodes": 2,
+    "devices": [0],
+    "accelerator": "gpu",
+    "strategy": {
+      "process_group_backend": "nccl",
+      "find_unused_parameters": true
+    },
+    "precision": "bf16-mixed",
+    "accumulate_grad_batches": 1,
+    "max_epochs": 1
+  }
+}
