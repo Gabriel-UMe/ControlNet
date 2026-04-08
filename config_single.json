@@ -1,0 +1,24 @@
+{
+  "environ": {
+    "PYTORCH_ALLOC_CONF": "expandable_segments:True",
+    "NCCL_P2P_DISABLE": "1",
+    "NCCL_SHM_DISABLE": "0"
+  },
+  "loader": {
+    "num_workers": 0,
+    "batch_size": 2,
+    "shuffle": true
+  },
+  "trainer": {
+    "num_nodes": 1,
+    "devices": [0],
+    "accelerator": "gpu",
+    "strategy": {
+      "process_group_backend": "nccl",
+      "find_unused_parameters": true
+    },
+    "precision": "bf16-mixed",
+    "accumulate_grad_batches": 1,
+    "max_epochs": 1
+  }
+}

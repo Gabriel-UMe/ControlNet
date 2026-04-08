@@ -1,6 +1,7 @@
 from share import *
 
 from typing import *
+import argparse
 import json
 import os
 import pytorch_lightning as pl
@@ -12,7 +13,10 @@ from tutorial_dataset import MyDataset
 from cldm.logger import ImageLogger
 from cldm.model import create_model, load_state_dict
 
-config_file_name = 'config_dual.json'
+parser = argparse.ArgumentParser()
+parser.add_argument('--config', default='config.json', help='Path to JSON config file')
+args = parser.parse_args()
+config_file_name = args.config
 
 # Configure environment
 environ_config: Optional[Dict[str, str]] = None
