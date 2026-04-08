@@ -118,14 +118,14 @@ if trainer_config is not None:
                 process_group_backend='nccl',
                 find_unused_parameters=True,
             )
-        if trainer_config.get('strategy', None) is not None:
-            trainer_config['strategy'] = DDPStrategy(**trainer_config['strategy'])
-        if trainer_config.get('max_epochs', None) is None:
-            trainer_config['max_epochs'] = 1
-        if trainer_config.get('precision', None) is None:
-            trainer_config['precision'] = 'bf16-mixed'
-        if trainer_config.get('accumulate_grad_batches', None) is None:
-            trainer_config['accumulate_grad_batches'] = 2
+    if isinstance(trainer_config.get('strategy', None), dict):
+        trainer_config['strategy'] = DDPStrategy(**trainer_config['strategy'])
+    if trainer_config.get('max_epochs', None) is None:
+        trainer_config['max_epochs'] = 1
+    if trainer_config.get('precision', None) is None:
+        trainer_config['precision'] = 'bf16-mixed'
+    if trainer_config.get('accumulate_grad_batches', None) is None:
+        trainer_config['accumulate_grad_batches'] = 2
     trainer_config['callbacks'] = [logger]  # override callbacks
     trainer = pl.Trainer(**trainer_config)
     print("Configured PyTorch-Lightning trainer from file")
